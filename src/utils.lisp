@@ -1,0 +1,41 @@
+(in-package :spill)
+
+(defun getm-iter (item &rest members)
+  `(getf ,item ,(first members)))
+
+(defmacro getm (item &rest members)
+  (let ((result item))
+    (car 
+     (last
+      (loop for mem in members
+       collect
+       (setf result (getm-iter result mem)))))))
+
+(defun break-color (color)
+  (let ((a (ash (logand color #xff000000) -24))
+        (r (ash (logand color #x00ff0000) -16))
+        (g (ash (logand color #x0000ff00) -8))
+        (b (logand color #x000000ff)))
+    (list :a a :r r :g g :b b)))
+
+(defun empty-string-p (string)
+  (or (not string) 
+      (not (> (length string) 0))))
+
+(defun get-center (rect)
+  (cons (+ (getf rect :x) (round (/ (getf rect :w) 2))) (+ (getf rect :y) (round (/ (getf rect :h) 2)))))
+
+(defun get-distance (rect1 rect2 &optional (round-p t))
+  (let* ((p1 (get-center rect1))
+         (p2 (get-center rect2))
+         (x1 (car p1))
+         (y1 (cdr p1))
+         (x2 (car p2))
+         (y2 (cdr p2)))
+    (if round-p
+        (round (sqrt (abs (+ (expt (- x2 x1) 2)  (expt (- y2 y1) 2)))))
+        (abs (sqrt (abs (+ (expt (- x2 x1) 2) (expt (- y2 y1) 2))))))))
+               
+            
+(defun middle (number-1 number-2)
+  (- (round (/ (max number-1 number-2) 2)) (round (/ (min number-1 number-2) 2))))
