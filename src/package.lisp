@@ -14,6 +14,7 @@
     #:fill-surface
     #:add-callback
     #:blit
+    #:get-keys
     #:open-window
     #:add-widget-callback
     #:get-event

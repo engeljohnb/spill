@@ -26,6 +26,9 @@
         :controller-start nil
         :keys-down nil))
 
+(defun get-keys ()
+  (getf *stable-input* :keys-down))
+
 (defun controller-movement-p ()
   (or (getf *stable-input* :left)
       (getf *stable-input* :right)
