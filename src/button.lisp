@@ -76,6 +76,56 @@
          (setf desired-button button)))
     desired-button))
 
+(defun create-label (text
+		     window
+		      width
+		      height
+		      &key (label-config *default-label-config*)
+		           (string-datum nil))
+  (let ((label (list
+		 :surface (funcall (getf label-config :surface)
+				   window
+				   width
+				   height
+				   nil 
+				   (getf label-config :font)
+				   (getf label-config :colors)
+				   (getf label-config :border-width))
+		 :blank-surface
+		 :font (open-font (getf label-config :font) (round (* height 0.5)))
+		 :default-rect (create-rect 0 0 width height)
+		 :string text 
+		 :string-datum string-datum
+		 :prev-string-datum string-datum
+		 :callbacks nil
+		 :callback-data 
+		 :border-width (getf label-config :border-width)
+		 :selected nil)))
+    ; These should already be set, but for some reason they aren't set by the statement above
+    (setf (getf label :string) text)
+    (setf (getf label :font) (open-font (getf label-config :font) (round (* height 0.5))))
+    (setf (getf label :string-datum) string-datum)
+    (setf (getf label :blank-surface) (create-surface window 0 0 width height))
+    (setf (getf label :prev-string-datum) string-datum)
+    (setf (Getf label :default-rect) (create-rect 0 0 width height))
+    (blit (getf label :surface) (getf label :blank-surface))
+    (draw-text (getf label :surface)
+	       (getf label :font)
+	       (format nil (getf label :string) (getf label :string-datum))
+	       :x (+ 1 (getf label :border-width)))
+    (setf (getf label :callbacks)
+	  (list (cons 'always (lambda (label)
+				(if (not (eql (getf label :string-datum) (getf label :prev-string-datum)))
+				    (progn (blit (getf label :blank-surface) (getf label :surface))
+					   (draw-text (getf label :surface) 
+						      (getf label :font) 
+						      (format nil (getf label :string) (getf label :string-datum))
+						      :x (+ 1 (getf label :border-width)))))
+				(setf (getf label :prev-string-datum) (getf label :string-datum))))))
+    (setf (getf label :callback-data)
+	  (list (cons 'always label)))
+    label))
+
 (defun free-button (button)
   (unless (getf button :freed)
           (free-surface (getf button :up-surface))

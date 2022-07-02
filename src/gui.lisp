@@ -59,6 +59,11 @@
   (dolist (widget (getm gui :current-page :widgets))
     (widget-callback widget 'page-enter)))
 
+(defun when-running (gui page-name fun data)
+  (let ((page (get-page-from-name gui page-name)))
+  (push (cons 'always fun) (getf page :callbacks))
+  (push (cons 'always data) (getf page :callback-data))))
+
 (defun add-page (gui name)
   (push (list :name name
               :window (getf gui :window)
@@ -387,11 +392,11 @@
   (let ((flags (get-input-signals)))
     (let ((selected-widget (get-selected-widget page)))
      (mapcar (lambda (flag) 
-                (widget-callback selected-widget flag)
-		(widget-callback page flag))
+                (widget-callback selected-widget flag))
              flags))
     (clear-window window)
     (dolist (widget (getf page :widgets))
+          (widget-callback widget 'always)
           (if (getf widget :active)
 	      (progn
 	        (if (and (eq (getf widget :type) 'typing-bar)
@@ -408,8 +413,11 @@
                    (not (getf widget :selected)))
               (widget-callback widget 'click-away))
           (blit (getf widget :surface) window :dest-rect (getf widget :default-rect)))
+    (mapcar (lambda (flag)
+	      (widget-callback page flag))
+	    flags))
     (flip-window window)
-    (sdl2:delay 25)))
+    (sdl2:delay 25))
 
 (defun free-page (page)
   (loop for widget in (getf page :widgets) collect
@@ -423,7 +431,6 @@
         (free-page page))
   (free-window (getf gui :window)))
        
-
 (defun run-application (gui)
   (process-page gui (getf gui :window) (getf gui :current-page))
   (if (>= (incf *frames*) 65335)

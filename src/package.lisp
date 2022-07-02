@@ -15,6 +15,10 @@
     #:add-callback
     #:blit
     #:get-keys
+    #:when-running
+    #:get-page-from-name
+    #:getm
+    #:create-label
     #:open-window
     #:add-widget-callback
     #:get-event

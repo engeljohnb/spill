@@ -187,7 +187,7 @@
   (let ((surface (create-surface window 0 0 width height))
         (font (open-font 
               font-path
-              (round (* width 0.2)))))
+              (round (* height 0.5)))))
     (fill-surface surface (getf config-colors :base-color))
     (draw-rect surface 
                      (getf config-colors :top-border)
@@ -213,7 +213,7 @@
   (let ((surface (create-surface window 0 0 width height))
         (font (open-font 
               font-path
-              (round (* width 0.2)))))
+              (round (* height 0.5)))))
     (fill-surface surface (getf config-colors :base-color))
     (draw-rect surface (getf config-colors :top-border)
                      (create-rect 0 0 width border-width))

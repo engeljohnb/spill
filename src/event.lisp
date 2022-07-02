@@ -27,7 +27,16 @@
         :keys-down nil))
 
 (defun get-keys ()
-  (getf *stable-input* :keys-down))
+  (let ((keys (getf *stable-input* :keys-down)))
+    (if (getf *stable-input* :left)
+        (push "left" keys))
+    (if (getf *stable-input* :right)
+        (push "right" keys))
+    (if (getf *stable-input* :up)
+        (push "up" keys))
+    (if (getf *stable-input* :down)
+        (push "down" keys))
+    keys))
 
 (defun controller-movement-p ()
   (or (getf *stable-input* :left)
