@@ -16,15 +16,21 @@
     #:blit
     #:get-keys
     #:when-running
-    #:get-page-from-name
+    #:get-page
     #:getm
+    #:getm-page
+    #:getm-page-test
     #:create-label
+    #:add-page
+    #:set-current-page
     #:open-window
     #:add-widget-callback
     #:get-event
     #:reset-events
     #:set-input-flags
     #:get-input-signals
+    #:create-tab-frame
+    #:add-tab
     #:remove-widget-callback
     #:add-widget
     #:run-application

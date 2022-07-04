@@ -6,4 +6,5 @@
 (load "/home/john/quicklisp/local-projects/spill/gui-config/input-config.lisp")
 (load "/home/john/quicklisp/local-projects/spill/gui-config/typing-bar-config.lisp")
 (load "/home/john/quicklisp/local-projects/spill/gui-config/label-config.lisp")
+(load "/home/john/quicklisp/local-projects/spill/gui-config/tab-config.lisp")
 

@@ -83,6 +83,7 @@
 		      &key (label-config *default-label-config*)
 		           (string-datum nil))
   (let ((label (list
+		 :type 'label
 		 :surface (funcall (getf label-config :surface)
 				   window
 				   width
@@ -134,3 +135,9 @@
           (free-surface (getf button :select-down-surface))
 	  (setf (getf button :freed) t)))
           ;Don't forget to free the animations!!
+
+(defun free-label (label)
+  (free-surface (getf label :surface))
+  (free-surface (getf label :blank-surface)))
+
+

@@ -69,10 +69,12 @@
                                 (getf split-color :a))))
 
 (defun clear-window (window)
-  (sdl2:render-clear (getf window :sdl-renderer)))
+  (if (member :sdl-window window)
+      (sdl2:render-clear (getf window :sdl-renderer))))
 
 (defun flip-window (window)
-  (sdl2:render-present (getf window :sdl-renderer)))
+   (if (member :sdl-window window)
+       (sdl2:render-present (getf window :sdl-renderer))))
 
 (defun get-event ()
   (let ((event (list :type :idle

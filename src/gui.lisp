@@ -42,38 +42,52 @@
         (if (and fun datum)
          (funcall (cdr fun) (cdr datum)))))))
 
-(defun get-page-from-name (gui page-name)
+(defun get-page (gui page-name)
   (let ((page nil))
     (dolist (current-page (getf gui :pages))
       (if (eq page-name (getf current-page :name))
           (setf page current-page)))
     (if (not page)
-        (setf page (get-page-from-name gui 'default)))
+        (setf page (get-page gui 'default)))
     page))
+
+(defun getm-page-iter (item &rest page-names)
+  `(get-page ,item ,(first page-names)))
+
+(defmacro getm-page (gui &rest page-names)
+  (let ((result gui))
+    (car 
+     (last
+      (loop for mem in page-names
+       collect
+       (setf result (getm-page-iter result mem)))))))
 
 (defun set-current-page (gui page-name)
   (dolist (widget (getm gui :current-page :widgets))
     (widget-callback widget 'page-exit))
   (setf (getf gui :prev-page) (getf gui :current-page))
-  (setf (getf gui :current-page) (get-page-from-name gui page-name))
+  (setf (getf gui :current-page) (get-page gui page-name))
   (dolist (widget (getm gui :current-page :widgets))
     (widget-callback widget 'page-enter)))
 
 (defun when-running (gui page-name fun data)
-  (let ((page (get-page-from-name gui page-name)))
+  (let ((page (get-page gui page-name)))
   (push (cons 'always fun) (getf page :callbacks))
   (push (cons 'always data) (getf page :callback-data))))
 
-(defun add-page (gui name)
+(defun add-page (gui name &key (render-target (getf gui :window)))
   (push (list :name name
-              :window (getf gui :window)
+              :render-target render-target
+	      :window (getf gui :window)
               :widgets nil
 	      :prev-selected-widget nil
               :selection-wait-frames 15
               :selection-wait-counter 0
               :selection-wait-offset 0
 	      :callbacks nil
-	      :callback-data nil)
+	      :callback-data nil
+	      :pages nil
+	      :current-page nil)
         (getf gui :pages)))
 
 (defun add-callback (widget trigger callback data)
@@ -130,8 +144,9 @@
     buttons))
 
 (defun add-widget (gui page-name widget)
-  (let ((page (get-page-from-name gui page-name)))
-    (push widget (getf page :widgets))))
+  (let ((page (get-page gui page-name)))
+    (push widget (getf page :widgets))
+    (widget-callback widget 'page-enter)))
 
 (defun create-controller-typing-page (gui)
   (let* ((button-size (floor (/ (getm gui :window :width) 
@@ -198,22 +213,22 @@
 			  (setf (getf typing-bar :selected) nil)
 			  (setf (getm gui :current-page :prev-selected-widget :selected) t)))
 		      (list typing-bar gui))
-  (add-callback (get-page-from-name gui 'gamepad-typing-bar)
+  (add-callback (get-page gui 'gamepad-typing-bar)
 		      'fleeting-controller-x-down
 		      #'(lambda (backspace)
 			  (widget-callback backspace 'fleeting-lmb-down))
 		      (name->button "<-" (first all-rows)))
-  (add-callback (get-page-from-name gui 'gamepad-typing-bar-shift)
+  (add-callback (get-page gui 'gamepad-typing-bar-shift)
 		      'fleeting-controller-x-down
 		      #'(lambda (backspace)
 			  (widget-callback backspace 'fleeting-lmb-down))
 		      (name->button "<-" (first all-shift-rows)))
-  (add-callback (get-page-from-name gui 'gamepad-typing-bar)
+  (add-callback (get-page gui 'gamepad-typing-bar)
 		      'fleeting-controller-y-down
 		      #'(lambda (space)
 			  (widget-callback space 'fleeting-lmb-down))
 		      (name->button " " (fifth all-rows)))
-  (add-callback (get-page-from-name gui 'gamepad-typing-bar-shift)
+  (add-callback (get-page gui 'gamepad-typing-bar-shift)
 		      'fleeting-controller-y-down
 		      #'(lambda (space)
 			  (widget-callback space 'fleeting-lmb-down))
@@ -386,45 +401,47 @@
    (widget-callback selected-widget 'selected)
    selected-widget))
  
-(defun process-page (gui window page)
-  (reset-events)
-  (set-input-flags)
-  (let ((flags (get-input-signals)))
-    (let ((selected-widget (get-selected-widget page)))
-     (mapcar (lambda (flag) 
-                (widget-callback selected-widget flag))
-             flags))
-    (clear-window window)
-    (dolist (widget (getf page :widgets))
-          (widget-callback widget 'always)
-          (if (getf widget :active)
-	      (progn
-	        (if (and (eq (getf widget :type) 'typing-bar)
-	    	         (eq (getf widget :input-source) 'gamepad)
-			 (not (eq (getm gui :current-page :name) 'gamepad-typing-bar))
-			 (not (eq (getm gui :current-page :name) 'gamepad-typing-bar-shift)))
-		      (progn
-			(setf (getf widget :active) nil)
-			(setf (getf widget :selected) nil)
-		        (set-current-page gui 'gamepad-typing-bar)))
-                (widget-callback widget 'active)))
-          (if (and (getf widget :active)
-                   (member 'fleeting-lmb-down flags)
-                   (not (getf widget :selected)))
-              (widget-callback widget 'click-away))
-          (blit (getf widget :surface) window :dest-rect (getf widget :default-rect)))
-    (mapcar (lambda (flag)
-	      (widget-callback page flag))
-	    flags))
-    (flip-window window)
-    (sdl2:delay 25))
+(defun process-page (gui page)
+  (if page (progn
+    (let ((flags (get-input-signals)))
+      (let ((selected-widget (get-selected-widget page)))
+       (mapcar (lambda (flag) 
+                  (widget-callback selected-widget flag))
+               flags))
+      (dolist (widget (getf page :widgets))
+            (widget-callback widget 'always)
+            (if (getf widget :active)
+                (progn
+                  (if (and (eq (getf widget :type) 'typing-bar)
+              	         (eq (getf widget :input-source) 'gamepad)
+          		 (not (eq (getm gui :current-page :name) 'gamepad-typing-bar))
+          		 (not (eq (getm gui :current-page :name) 'gamepad-typing-bar-shift)))
+          	      (progn
+          		(setf (getf widget :active) nil)
+          		(setf (getf widget :selected) nil)
+          	        (set-current-page gui 'gamepad-typing-bar)))
+                  (widget-callback widget 'active)))
+            (if (and (getf widget :active)
+                     (member 'fleeting-lmb-down flags)
+                     (not (getf widget :selected)))
+                (widget-callback widget 'click-away))
+            (blit (getf widget :surface) (getf page :render-target) :dest-rect (getf widget :default-rect)))
+      (mapcar (lambda (flag)
+                (widget-callback page flag))
+              flags)
+      (unless (eql (getf page :render-target) (getf gui :window))
+	      (blit (getf page :render-target) (getf gui :window)))
+      (process-page page (getf page :current-page))
+      (sdl2:delay 20)))))
 
 (defun free-page (page)
   (loop for widget in (getf page :widgets) collect
        (cond ((eq (getf widget :type) 'button)
               (free-button widget))
              ((eq (getf widget :type) 'typing-bar)
-              (free-typing-bar widget)))))
+              (free-typing-bar widget))
+	     ((eq (getf widget :type) 'label)
+	      (free-label widget)))))
 
 (defun close-application (gui)
   (loop for page in (getf gui :pages) collect
@@ -432,7 +449,11 @@
   (free-window (getf gui :window)))
        
 (defun run-application (gui)
-  (process-page gui (getf gui :window) (getf gui :current-page))
+  (reset-events)
+  (set-input-flags)
+  (clear-window (getf gui :window))
+  (process-page gui (getf gui :current-page))
+  (flip-window (getf gui :window))
   (if (>= (incf *frames*) 65335)
       (setf *frames* 0))
   (if *running*

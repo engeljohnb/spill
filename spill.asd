@@ -12,5 +12,6 @@
 		 (:file "surface")
 		 (:file "event")
 		 (:file "text")
+		 (:file "tab")
 		 (:file "button")
 		 (:file "gui")))
