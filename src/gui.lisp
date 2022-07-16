@@ -40,10 +40,11 @@
   (let ((functions (remove-if-not #'(lambda (fun) (eq (car fun) trigger)) (getf widget :callbacks)))
         (data (remove-if-not #'(lambda (datum) (eq (car datum) trigger)) (getf widget :callback-data))))
     (loop for i from 0 to (length functions) collect
+     (progn
       (let ((fun (nth i functions))
             (datum (nth i data)))
         (if (and fun datum)
-         (funcall (cdr fun) (cdr datum)))))))
+         (funcall (cdr fun) (cdr datum))))))))
 
 (defun get-page (gui page-name)
   (if gui
@@ -450,7 +451,7 @@
       (unless (eql (getf page :render-target) (getf gui :window))
 	      (if (getf gui :window)
 	          (blit (getf page :render-target) (getf gui :window))))
-      (process-page page (getf page :current-page))
+            ;(process-page page (getf page :current-page))
       (keep-time 20)))))
 
 (defun free-page (page)

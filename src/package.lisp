@@ -35,5 +35,6 @@
     #:tab-frame-get-page
     #:remove-widget-callback
     #:add-widget
+    #:click
     #:run-application
     #:close-application))
