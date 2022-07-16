@@ -6,6 +6,9 @@
         ; :callback-data
         ; :selected
 (in-package :spill)
+
+(defparameter *prev-time* 0)
+
 (defun create-widget-grid (widgets-per-row x y x-spacing y-spacing)
   (list :widgets-per-row widgets-per-row
         :x x
@@ -76,7 +79,9 @@
   (push (cons 'always fun) (getf page :callbacks))
   (push (cons 'always data) (getf page :callback-data))))
 
-(defun add-page (gui name &key (render-target (getf gui :window)))
+(defun add-page (gui name &key (render-target (getf gui :window)) (render-rect nil))
+  (if (eq (getf gui :type) 'tab)
+      (setf render-rect (getf gui :tab-frame-rect)))
   (push (list :name name
               :render-target render-target
 	      :window (getf gui :window)
@@ -87,7 +92,10 @@
               :selection-wait-offset 0
 	      :callbacks nil
 	      :callback-data nil
-	      :pages nil
+	      :default-rect (if render-rect
+			        render-rect
+				(getf render-target :rect))
+	      :pages nil 
 	      :current-page nil)
         (getf gui :pages)))
 
@@ -266,6 +274,7 @@
 
 (defun create-gui (window &key (input-config *default-input-config*))
   (let ((gui (list :window window
+		   :type 'gui
                    :pages nil
                    :current-page nil
 		   :prev-page nil)))
@@ -380,7 +389,8 @@
                          
 (defun get-selected-widget (page &optional (input-config *default-input-config*))
   (let ((selected-widget nil)
-        (prev-selected nil)) 
+        (prev-selected nil)
+	(mouse-pos (get-relative-mouse-pos page)))
    (dolist (widget (getf page :widgets))
      (if (getf widget :selected)
          (setf prev-selected widget)))
@@ -388,11 +398,11 @@
    (if (eq (getf input-config :source) 'key-and-mouse) 
        (progn
           (loop for widget in (getf page :widgets) collect
-           (if (point-collide-p 
-                 (getf widget :default-rect)
-                 (getf *stable-input* :mouse-x)
-                 (getf *stable-input* :mouse-y))
-               (setf selected-widget widget)))))
+             (if (point-collide-p 
+                   (getf widget :default-rect)
+		   (getf mouse-pos :x)
+		   (getf mouse-pos :y))
+                 (setf selected-widget widget)))))
    (if (eq (getf input-config :source) 'gamepad)
        (setf selected-widget (get-controller-selected-widget page prev-selected input-config)))
    (setf (getf selected-widget :selected) t)
@@ -401,7 +411,14 @@
               (setf (getf prev-selected :selected) nil)))
    (widget-callback selected-widget 'selected)
    selected-widget))
- 
+
+(defun keep-time (target-time)
+  (let* ((current-time (sdl2:get-ticks))
+         (delta-t (- current-time *prev-time*)))
+    (if (< delta-t target-time)
+        (sdl2:delay (- target-time delta-t)))
+    (setf *prev-time* current-time)))
+
 (defun process-page (gui page)
   (if page (progn
     (let ((flags (get-input-signals)))
@@ -434,7 +451,7 @@
 	      (if (getf gui :window)
 	          (blit (getf page :render-target) (getf gui :window))))
       (process-page page (getf page :current-page))
-      (sdl2:delay 20)))))
+      (keep-time 20)))))
 
 (defun free-page (page)
   (loop for widget in (getf page :widgets) collect
@@ -443,7 +460,9 @@
              ((eq (getf widget :type) 'typing-bar)
               (free-typing-bar widget))
 	     ((eq (getf widget :type) 'label)
-	      (free-label widget)))))
+	      (free-label widget))
+	     ((eq (getf widget :type) 'tab-frame)
+	      (free-tab-frame widget)))))
 
 (defun close-application (gui)
   (loop for page in (getf gui :pages) collect

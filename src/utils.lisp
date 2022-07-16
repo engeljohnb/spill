@@ -35,6 +35,14 @@
     (if round-p
         (round (sqrt (abs (+ (expt (- x2 x1) 2)  (expt (- y2 y1) 2)))))
         (abs (sqrt (abs (+ (expt (- x2 x1) 2) (expt (- y2 y1) 2))))))))
+
+(defun get-rect-in-rect (inner-rect outer-rect)
+  "Get a rect's coordinates relative to a bigger rect containing it"
+  (list :x (- (getf inner-rect :x) (getf outer-rect :x))
+	:y (- (getf inner-rect :y) (getf outer-rect :y))
+	:w (getf inner-rect :w)
+	:h (getf inner-rect :h)))
+		  
                
             
 (defun middle (number-1 number-2)
