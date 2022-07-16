@@ -31,6 +31,8 @@
     #:get-input-signals
     #:create-tab-frame
     #:add-tab
+    #:get-tab
+    #:tab-frame-get-page
     #:remove-widget-callback
     #:add-widget
     #:run-application

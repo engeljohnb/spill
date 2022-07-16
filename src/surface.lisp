@@ -104,7 +104,10 @@
 	 (if (member :surface source)
 	     (blit-to-surface (getf source :surface) (getf dest :surface))
 	     (blit-to-surface source :surface (getf dest :surface))))
-        (t (format t "blit error: invalid surface~%"))))
+        (t (progn (format t "blit error: invalid surface: ~%")
+		  (print dest)
+		  (fresh-line)
+		  (invoke-debugger)))))
 
 (defun free-surface (surface)
   (sdl2:destroy-texture (getf surface :sdl-texture)))

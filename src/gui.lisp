@@ -43,13 +43,14 @@
          (funcall (cdr fun) (cdr datum)))))))
 
 (defun get-page (gui page-name)
-  (let ((page nil))
-    (dolist (current-page (getf gui :pages))
-      (if (eq page-name (getf current-page :name))
-          (setf page current-page)))
-    (if (not page)
-        (setf page (get-page gui 'default)))
-    page))
+  (if gui
+      (let ((page nil))
+        (dolist (current-page (getf gui :pages))
+          (if (eq page-name (getf current-page :name))
+              (setf page current-page)))
+        (if (not page)
+            (setf page (get-page gui 'default)))
+        page)))
 
 (defun getm-page-iter (item &rest page-names)
   `(get-page ,item ,(first page-names)))
@@ -430,7 +431,8 @@
                 (widget-callback page flag))
               flags)
       (unless (eql (getf page :render-target) (getf gui :window))
-	      (blit (getf page :render-target) (getf gui :window)))
+	      (if (getf gui :window)
+	          (blit (getf page :render-target) (getf gui :window))))
       (process-page page (getf page :current-page))
       (sdl2:delay 20)))))
 
