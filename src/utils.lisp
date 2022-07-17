@@ -42,8 +42,22 @@
 	:y (- (getf inner-rect :y) (getf outer-rect :y))
 	:w (getf inner-rect :w)
 	:h (getf inner-rect :h)))
-		  
-               
             
 (defun middle (number-1 number-2)
   (- (round (/ (max number-1 number-2) 2)) (round (/ (min number-1 number-2) 2))))
+
+(defun split-text (text &key (dividing-character #\newline))
+  (let ((segments nil)
+	(segment-start 0)
+	(segment-end 0))
+    (map 'string 
+	 #'(lambda (char)
+	      (if (or (eql char dividing-character)
+		      (= segment-end (- (length text) 1)))
+		  (progn 
+		    (push (subseq text segment-start segment-end) segments)
+		    (setf segment-start (+ segment-end 1))))
+	      (incf segment-end)
+	      char)
+	 text)
+    (reverse segments)))

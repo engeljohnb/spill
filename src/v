@@ -1,0 +1,8 @@
+(defparameter *default-tab-config*
+  (list :tab-up-surface 'default-tab-up-surface
+	:tab-down-surface 'default-tab-down-surface
+	:font "/home/john/quicklisp/local-projects/spill/fonts/LiberationMono-Regular.ttf"
+	:colors (list :tab-up-colors (list :base-color #xff998888
+					   :border-color #xff222222
+					   :text-color #xff000000))
+	:border-width 2))

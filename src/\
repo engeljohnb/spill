@@ -26,10 +26,6 @@
         :controller-start nil
         :keys-down nil))
 
-(defun get-mouse-pos ()
-  (list :x (getf *stable-input* :mouse-x)
-	:y (getf *stable-input* :mouse-y)))
-
 (defun get-keys ()
   (let ((keys (getf *stable-input* :keys-down)))
     (if (getf *stable-input* :left)

@@ -76,12 +76,83 @@
          (setf desired-button button)))
     desired-button))
 
+(defun get-longest-segment (segments)
+  (let ((current-longest (first segments)))
+    (dolist (segment segments)
+      (if (>= (length segment) (length current-longest))
+	  (setf current-longest segment)))
+    current-longest))
+
+(defun get-text-height (segments font)
+  (let ((current-height 0))
+    (dolist (segment segments)
+      (if (> (length segment) 0)
+	  (incf current-height (getf (get-text-size font segment) :h))
+	  (incf current-height (getf (get-text-size font "0") :h))))
+    current-height))
+
+
+(defun create-info-box (window text font-size &key (config *default-info-box-config*))
+  (let* ((info-box (list
+		    :type 'info-box
+		    :surface nil
+		    :font (open-font (getf config :font) font-size)
+		    :border-width (getf config :border-width)
+		    :default-rect nil))
+	 (segments (split-text text))
+	 (longest-segment (get-longest-segment segments))
+	 (number-of-lines (length segments))
+	 (text-width (getf (get-text-size (getf info-box :font) longest-segment) :w))
+	 (text-height (get-text-height segments (getf info-box :font)))
+	 (current-y (getf config :border-width)))
+    (setf (getf info-box :surface) (create-surface window 
+						   0 0 
+						   (+ text-width (getf info-box :border-width) 2)
+						   (+ text-height (getf info-box :border-width) 2)))
+    (fill-surface (getf info-box :surface) (getf config :base-color))
+    (draw-rect (getf info-box :surface)
+	       (getf config :border-color)
+	       (create-rect 0 0 
+			  (getm info-box :surface :rect :w) 
+			  (getf info-box :border-width)))
+    (draw-rect (getf info-box :surface)
+	       (getf config :border-color)
+	       (create-rect (- (getm info-box :surface :rect :w) (getf info-box :border-width))
+			  0
+			  (getf info-box :border-width)
+			  (getm info-box :surface :rect :h)))
+    (draw-rect (getf info-box :surface)
+	       (getf config :border-color)
+	       (create-rect 0 0
+			  (getf info-box :border-width)
+			  (getm info-box :surface :rect :h)))
+    (draw-rect (getf info-box :surface)
+	       (getf config :border-color)
+	       (create-rect 0
+			  (- (getm info-box :surface :rect :h) (getf info-box :border-width))
+			  (getm info-box :surface :rect :w)
+			  (getf info-box :border-width)))
+    (setf (getf info-box :default-rect) (getm info-box :surface :rect))
+    (dolist (segment segments)
+      (if (> (length segment) 0)
+	  (progn
+            (draw-text (getf info-box :surface)
+	  	       (getf info-box :font)
+		       segment
+		       :x (+ (getf info-box :border-width))
+		       :y current-y)
+            (incf current-y (getf (get-text-size (getf info-box :font) segment) :h)))
+	  (incf current-y (getf (get-text-size (getf info-box :font) "0") :h))))
+    info-box))
+
+
 (defun create-label (text
-		     window
+		      window
 		      width
 		      height
 		      &key (label-config *default-label-config*)
-		           (string-datum nil))
+		           (label-update-callback nil)
+			   (label-update-data nil))
   (let ((label (list
 		 :type 'label
 		 :surface (funcall (getf label-config :surface)
@@ -96,8 +167,9 @@
 		 :font (open-font (getf label-config :font) (round (* height 0.5)))
 		 :default-rect (create-rect 0 0 width height)
 		 :string text 
-		 :string-datum string-datum
-		 :prev-string-datum string-datum
+		 :label-update-callback label-update-callback
+		 :label-update-data label-update-data
+		 :prev-datum nil 
 		 :callbacks nil
 		 :callback-data 
 		 :border-width (getf label-config :border-width)
@@ -105,24 +177,29 @@
     ; These should already be set, but for some reason they aren't set by the statement above
     (setf (getf label :string) text)
     (setf (getf label :font) (open-font (getf label-config :font) (round (* height 0.5))))
-    (setf (getf label :string-datum) string-datum)
+    (setf (getf label :label-update-callback) label-update-callback)
+    (setf (getf label :label-update-data) label-update-data)
     (setf (getf label :blank-surface) (create-surface window 0 0 width height))
-    (setf (getf label :prev-string-datum) string-datum)
-    (setf (Getf label :default-rect) (create-rect 0 0 width height))
+    (setf (getf label :default-rect) (create-rect 0 0 width height))
     (blit (getf label :surface) (getf label :blank-surface))
     (draw-text (getf label :surface)
 	       (getf label :font)
-	       (format nil (getf label :string) (getf label :string-datum))
+	       (getf label :string)
 	       :x (+ 1 (getf label :border-width)))
+    (blit (getf label :surface)
+	  (getf label :blank-surface))
     (setf (getf label :callbacks)
 	  (list (cons 'always (lambda (label)
-				(if (not (eql (getf label :string-datum) (getf label :prev-string-datum)))
-				    (progn (blit (getf label :blank-surface) (getf label :surface))
-					   (draw-text (getf label :surface) 
-						      (getf label :font) 
-						      (format nil (getf label :string) (getf label :string-datum))
-						      :x (+ 1 (getf label :border-width)))))
-				(setf (getf label :prev-string-datum) (getf label :string-datum))))))
+				(let* ((new-datum (funcall (getf label :label-update-callback) (getf label :label-update-data)))
+				       (string (format nil "~A" new-datum))
+				       (size (get-text-size (getf label :font) string)))
+				   (if (not (eql new-datum (getf label :prev-datum)))
+				       (progn (blit (getf label :blank-surface) (getf label :surface))
+				   	      (draw-text (getf label :surface) 
+						         (getf label :font) 
+							 string
+						         :x (- (getm label :surface :rect :w) (getf size :w) (getf label :border-width)))))
+				   (setf (getf label :prev-datum) new-datum))))))
     (setf (getf label :callback-data)
 	  (list (cons 'always label)))
     label))
@@ -137,6 +214,7 @@
           ;Don't forget to free the animations!!
 
 (defun free-label (label)
+  (close-font (getf label :font))
   (free-surface (getf label :surface))
   (free-surface (getf label :blank-surface)))
 

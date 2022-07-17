@@ -15,6 +15,8 @@
     #:add-callback
     #:blit
     #:get-keys
+    #:get-relative-mouse-pos
+    #:get-mouse-pos
     #:when-running
     #:get-page
     #:getm
@@ -36,5 +38,10 @@
     #:remove-widget-callback
     #:add-widget
     #:click
+    #:selected
+    #:deselected
+    #:click-and-drag
+    #:hover-mouse
+    #:create-info-box
     #:run-application
     #:close-application))

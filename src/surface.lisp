@@ -113,18 +113,6 @@
   (sdl2:destroy-texture (getf surface :sdl-texture)))
  
 
-#|
-(defun draw-rect (dest color rect)
-  (let ((surface (create-surface (if (member :window dest) 
-                                           (getf dest :window)
-                                           dest)
-                                       (getf rect :x)
-                                       (getf rect :y)
-                                       (getf rect :w) 
-                                       (getf rect :h))))
-    (fill-surface surface color)
-    (blit surface dest :source-rect rect :dest-rect rect))) |#
-                 
 (defun draw-rect (dest color rect &optional (filled-p t))
   (let ((split-color (break-color color))
         (prev-color (break-color (sdl2:get-render-draw-color (getf dest :sdl-renderer))))
