@@ -55,8 +55,8 @@
       (getf *fleeting-input* :down)))
 
 (defun get-relative-mouse-pos (widget)
-  (let ((rect (cond ;((member :parent-page-rect widget)
-		    ; (getf widget :parent-page-rect))
+  (let ((rect (cond ((member :parent-page-rect widget)
+		     (getf widget :parent-page-rect))
 		    ((member :default-rect widget)
 		     (getf widget :default-rect))
 		    ((member :rect widget)

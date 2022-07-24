@@ -18,7 +18,7 @@
 
 (defun open-font (filename size)
    (list :sdl-font (sdl2-ttf:open-font filename size)
-        :size size))
+         :size size))
 
 (defun close-font (font)
   (sdl2-ttf:close-font (getf font :sdl-font)))

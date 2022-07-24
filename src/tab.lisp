@@ -135,6 +135,7 @@
 			 :tab-width tab-width
 			 :tab-height tab-height
 			 :border-width (getf config :border-width)
+			 :parent-page-rect nil
 		         :default-rect (create-rect x
 		              		            y
 						    page-width

@@ -60,4 +60,8 @@
 	      (incf segment-end)
 	      char)
 	 text)
+    (setf (first segments)
+	  (concatenate 'string
+		       (first segments)
+		       (string (last-char text))))
     (reverse segments)))
