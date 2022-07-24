@@ -76,11 +76,15 @@
     (widget-callback widget 'page-enter)))
 
 (defun when-running (gui page-name fun data)
-  (let ((page (get-page gui page-name)))
-  (push (cons 'always fun) (getf page :callbacks))
-  (push (cons 'always data) (getf page :callback-data))))
+  (if (eq page-name 'all-pages)
+    (dolist (current-page (getf gui :pages))
+        (push (cons 'always fun) (getf current-page :callbacks))
+        (push (cons 'always data) (getf current-page :callback-data)))
+     (progn (let ((page (get-page gui page-name)))
+       (push (cons 'always fun) (getf page :callbacks))
+       (push (cons 'always data) (getf page :callback-data))))))
 
-(defun add-page (gui name &key (render-target (getf gui :window)) (render-rect nil))
+(defun add-page (gui name &key (render-target (getf gui :render-target)) (render-rect nil))
   (if (eq (getf gui :type) 'tab)
       (setf render-rect (getf gui :tab-frame-rect)))
   (push (list :name name
@@ -155,6 +159,14 @@
 
 (defun add-widget (gui page-name widget)
   (let ((page (get-page gui page-name)))
+    (if (eq (getf widget :type) 'tab-frame)
+	(dolist (tab (getf widget :tabs))
+	  (dolist (tab-page (getf tab :pages))
+	    (setf (getf tab-page :default-rect)
+		  (create-rect (getm page :default-rect :x)
+			       (+ (getm page :default-rect :y) (getm tab :tab-height))
+			       (getm page :default-rect :w)
+			       (- (getm page :default-rect :h) (getm tab :tab-height)))))))
     (push widget (getf page :widgets))
     (widget-callback widget 'page-enter)))
 
@@ -273,13 +285,15 @@
     (dolist (button row)
       (add-widget gui 'gamepad-typing-bar-shift button)))))
 
-(defun create-gui (window &key (input-config *default-input-config*))
+(defun create-gui (window &key (input-config *default-input-config*) (render-target nil) (render-rect nil))
   (let ((gui (list :window window
 		   :type 'gui
                    :pages nil
                    :current-page nil
 		   :prev-page nil)))
-    (add-page gui 'default)
+    (if (not render-target)
+        (setf render-target window))
+    (add-page gui 'default :render-target render-target :render-rect render-rect)
     (if (eq (getf input-config :source) 'gamepad)
         (create-controller-typing-page gui))
     (set-current-page gui 'default)
@@ -398,7 +412,7 @@
    (setf (getf page :prev-selected-widget) prev-selected)
    (if (eq (getf input-config :source) 'key-and-mouse) 
        (progn
-          (loop for widget in (getf page :widgets) collect
+          (dolist (widget (getf page :widgets))
              (if (point-collide-p 
                    (getf widget :default-rect)
 		   (getf mouse-pos :x)

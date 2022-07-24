@@ -22,6 +22,8 @@
 		   :surface nil
 		   :selected nil
 		   :active nil
+		   :tab-width (getf tab-frame :tab-width)
+		   :tab-height (getf tab-frame :tab-height)
 		   :tab-frame-rect (copy-list (getf tab-frame :default-rect))
 		   :up-surface (default-tab-surface (getf tab-frame :window)
 						       name
@@ -57,7 +59,7 @@
 	       (setf (getf tab :active) t))
 	(setf (getf tab :surface) (getf tab :down-surface)))
     (setf (getf tab :default-rect) (getm tab :surface :rect))
-    (add-page tab 'default :render-target (getf tab-frame :render-surface))
+    (add-page tab 'default :render-target (getf tab-frame :render-target))
     (setf (getf tab :current-page) (get-page tab 'default))
     (push tab (getf tab-frame :tabs))))
 
@@ -71,10 +73,10 @@
 (defun tab-frame-get-page (tab-frame tab-name page-name)
   (get-page (get-tab tab-frame tab-name) page-name))
 
-(defun create-tab-frame-surface (window width height tab-width tab-height border-width config-colors)
-  (let ((main-surface (create-surface window 0 0 width height))
+(defun create-tab-frame-surface (window x y width height tab-width tab-height border-width config-colors)
+  (let ((main-surface (create-surface window x y width height))
 	(border-surface (create-surface window border-width border-width (- width (* 2 border-width)) (- height (* 2 border-width))))
-	(tab-area-surface (create-surface window 0 0 width tab-height))
+	(tab-area-surface (create-surface window x y width tab-height))
 	(tab-area-border-surface (create-surface window border-width border-width (- width (* 2 border-width)) (- tab-height (* 2 border-width)))))
     (fill-surface main-surface (getf config-colors :border-color))
     (fill-surface border-surface (getf config-colors :base-color))
@@ -115,10 +117,10 @@
 	   (setf (getf selected-tab :active) t)
 	   (setf (getf selected-tab :selected) t)
 	   (setf (getf selected-tab :surface) (getf selected-tab :up-surface))
-           (blit (getf tab-frame :blank-render-surface) (getf tab-frame :render-surface))))
+           (blit (getf tab-frame :blank-render-target) (getf tab-frame :render-target))))
      (if (getf tab :active)
          (process-page tab (getf tab :current-page)))
-     (blit (getf tab-frame :render-surface) (getf tab-frame :surface))
+     (blit (getf tab-frame :render-target) (getf tab-frame :surface))
      (blit (getf tab :surface) (getf tab-frame :surface)))))
 
 (defun create-tab-frame (window page-width page-height tab-width tab-height &key (config *default-tab-frame-config*) (x 0) (y 0))
@@ -126,8 +128,8 @@
 			 :type 'tab-frame
 		         :surface nil
 			 :blank-surface nil
-			 :render-surface nil
-			 :blank-render-surface nil
+			 :render-target nil
+			 :blank-render-target nil
 		         :tabs nil
 			 :current-tab nil
 			 :tab-width tab-width
@@ -140,6 +142,7 @@
 		         :callbacks nil
 		         :callback-data nil)))
     (setf (getf tab-frame :surface) (create-tab-frame-surface window
+							      x y
 					                     (getm tab-frame :default-rect :w)
 					                     (getm tab-frame :default-rect :h)
 							     (getf tab-frame :tab-width)
@@ -147,24 +150,25 @@
 					                     (getf config :border-width)
 					                     (getm config :colors)))
     (setf (getf tab-frame :blank-surface) (create-tab-frame-surface window
+							      x y 
 					                     (getm tab-frame :default-rect :w)
 					                     (getm tab-frame :default-rect :h)
 							     (getf tab-frame :tab-width)
 							     (getf tab-frame :tab-height)
 					                     (getf config :border-width)
 					                     (getm config :colors)))
-    (setf (getf tab-frame :render-surface) (create-surface window
+    (setf (getf tab-frame :render-target) (create-surface window
 								 (getf tab-frame :border-width)
 								 (+ (getf tab-frame :tab-height) (getf tab-frame :border-width))
 								 (- page-width (* 2 (getf tab-frame :border-width)))
 								 (- page-height (* 2 (getf tab-frame :border-width)))))
-   (setf (getf tab-frame :blank-render-surface) (create-surface window
+   (setf (getf tab-frame :blank-render-target) (create-surface window
 								 0
 								 0
 								 (- page-width (* 2 (getf tab-frame :border-width)))
 								 (- page-height (* 2 (getf tab-frame :border-width)))))
-    (fill-surface (getf tab-frame :render-surface) (getm config :colors :base-color))
-    (fill-surface (getf tab-frame :blank-render-surface) (getm config :colors :base-color))
+    (fill-surface (getf tab-frame :render-target) (getm config :colors :base-color))
+    (fill-surface (getf tab-frame :blank-render-target) (getm config :colors :base-color))
     (setf (getf tab-frame :callbacks) (list (cons 'always #'process-tab-frame)
 					    (cons 'page-enter #'process-tab-frame)))
     (setf (getf tab-frame :callback-data) (list (cons 'always tab-frame)
@@ -181,8 +185,8 @@
 
 (defun free-tab-frame (tab-frame)
   (free-surface (getf tab-frame :blank-surface))
-  (free-surface (getf tab-frame :render-surface))
-  (free-surface (getf tab-frame :blank-render-surface))
+  (free-surface (getf tab-frame :render-target))
+  (free-surface (getf tab-frame :blank-render-target))
   (if (getf tab-frame :tabs)
       (dolist (tab (getf tab-frame :tabs))
       (free-tab tab))))

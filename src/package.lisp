@@ -40,8 +40,10 @@
     #:click
     #:selected
     #:deselected
+    #:all-pages
     #:click-and-drag
     #:hover-mouse
     #:create-info-box
     #:run-application
+    #:process-page
     #:close-application))

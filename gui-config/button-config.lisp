@@ -14,13 +14,13 @@
                                                  :top-border #xff444444
                                                  :bottom-border #xffbbbbbb
                                                  :text-color #xff000000)
-                       :button-select-up-colors (list :base-color #xff888899
-                                                   :top-border #xffbbbbbb
-                                                   :bottom-border #xff444444
+                       :button-select-up-colors (list :base-color #xff889999
+                                                   :top-border #xffbbccbb
+                                                   :bottom-border #xff445544
                                                    :text-color #xff000000)
-                        :button-select-down-colors (list :base-color #xff666677
-                                                         :top-border #xff444444
-                                                         :bottom-border #xffbbbbbb
+                        :button-select-down-colors (list :base-color #xff667777
+                                                         :top-border #xff445544
+                                                         :bottom-border #xffbbccbb
                                                          :text-color #xff000000))
         :button-up-border-width 4
         :button-down-border-width 4

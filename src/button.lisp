@@ -92,7 +92,7 @@
     current-height))
 
 
-(defun create-info-box (window text font-size &key (config *default-info-box-config*))
+(defun create-info-box (window text &key (config *default-info-box-config*) (font-size 11))
   (let* ((info-box (list
 		    :type 'info-box
 		    :surface nil
