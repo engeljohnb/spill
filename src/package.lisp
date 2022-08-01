@@ -40,6 +40,7 @@
     #:click
     #:selected
     #:deselected
+    #:fleeting-lmb-down
     #:all-pages
     #:click-and-drag
     #:hover-mouse

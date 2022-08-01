@@ -31,10 +31,6 @@
     (setf (gethash '/ shift-hash) "?")))
 
 
-(defun --print ()
-  (print "If this works i will be happy")
-  (fresh-line))
-
 (defun init ()
   (sdl2:init :everything)
   (sdl2-ttf:init)
@@ -52,7 +48,7 @@
                         :w w
                         :h h
                         :flags flags))
-           (renderer (sdl2:create-renderer window -1 '(:software))))
+           (renderer (sdl2:create-renderer window -1 '(:accelerated))))
       (sdl2:set-render-draw-blend-mode renderer :blend)
       (if fullscreen
 	  (progn
