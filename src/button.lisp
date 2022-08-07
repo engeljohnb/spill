@@ -52,21 +52,32 @@
                       :select-down-surface select-down-surface
                       :selected nil
                       :callbacks nil
+		      :currently-down nil
+		      :frames-down 0
                       :callback-data nil
                       :animation animation
                       :surface up-surface
                       :default-rect (getf up-surface :rect)
 		      :freed nil)))
     (setf (getf button :callbacks) (list 
-                                    (cons 'hold-mouse #'(lambda (button) (setf (getf button :surface) (getf button :select-down-surface))))
-                                    (cons 'click #'(lambda (button) (setf (getf button :surface) (getf button :select-up-surface))))
+                                    (cons 'hold-mouse #'(lambda (button) 
+							  (setf (getf button :currently-down) t)))
+                                    ;(cons 'click #'(lambda (button) (setf (getf button :surface) (getf button :select-up-surface))))
                                     (cons 'selected #'(lambda (button) (setf (getf button :surface) (getf button :select-up-surface))))
-                                    (cons 'deselected #'(lambda (button) (setf (getf button :surface) (getf button :up-surface))))))
+                                    (cons 'deselected #'(lambda (button) (setf (getf button :surface) (getf button :up-surface))))
+	  			    (cons 'always #'(lambda (button)
+						      (if (getf button :currently-down)
+							  (progn
+							    (unless (or (< (incf (getf button :frames-down)) 5)
+								        (mouse-down-p 'left))
+							            (setf (getf button :currently-down) nil))
+							    (setf (getf button :surface) (getf button :select-down-surface))))))))
     (setf (getf button :callback-data) (list 
                                         (cons 'hold-mouse button)
-                                        (cons 'click button)
+                                        ;(cons 'click button)
                                         (cons 'selected button)
-                                        (cons 'deselected button))) 
+                                        (cons 'deselected button)
+					(cons 'always button)))
     button))
 
 (defun name->button (name list-of-buttons)

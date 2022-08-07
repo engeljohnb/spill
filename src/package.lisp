@@ -44,7 +44,9 @@
     #:all-pages
     #:click-and-drag
     #:hover-mouse
+    #:*hover-mouse-time*
     #:create-info-box
     #:run-application
     #:process-page
+    #:*delta-t*
     #:close-application))
