@@ -37,6 +37,7 @@
     #:tab-frame-get-page
     #:remove-widget-callback
     #:add-widget
+    #:default
     #:click
     #:selected
     #:deselected
