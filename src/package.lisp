@@ -8,6 +8,7 @@
     #:create-window
     #:create-typing-bar
     #:create-gui
+    #:create-rect
     #:create-surface
     #:create-button
     #:create-image

@@ -16,15 +16,6 @@
 	:prev-mouse-y 0
         :mouse-x 0 
         :mouse-y 0
-        ;:controller-a nil
-        ;:controller-b nil
-        ;:controller-x nil
-        ;:controller-y nil
-        ;:controller-rb nil
-        ;:controller-lb nil
-        ;:controller-rt nil
-        ;:controller-lt nil
-        ;:controller-start nil
         :keys-down nil))
 
 (defun get-mouse-pos ()
@@ -47,18 +38,6 @@
         (push "down" keys))
     keys))
 
-(defun controller-movement-p ()
-  (or (getf *stable-input* :left)
-      (getf *stable-input* :right)
-      (getf *stable-input* :up)
-      (getf *stable-input* :down)))
-
-(defun fleeting-controller-movement-p ()
-  (or (getf *fleeting-input* :left)
-      (getf *fleeting-input* :right)
-      (getf *fleeting-input* :up)
-      (getf *fleeting-input* :down)))
-
 (defun get-relative-mouse-pos (widget)
   (let ((rect (cond ((member :parent-page-rect widget)
 		     (getf widget :parent-page-rect))
@@ -80,8 +59,7 @@
 		(getf rect :y)))))
 
 (defun get-input-signals (&optional (input-config *default-input-config*))
-  (let ((flags nil)
-        (controller-motion (controller-movement-p)))
+  (let ((flags nil))
    (if (getf *fleeting-input* :lmb-down) (push 'lmb-down flags))
    (if (and (getf *fleeting-input* :mouse-motion) (getf *stable-input* :lmb-down))
        (push 'click-and-drag flags))
@@ -105,39 +83,13 @@
    (if (getf *fleeting-input* :down)
        (push 'fleeting-down flags)) 
    (if (getf *fleeting-input* :lmb-down)
-	   ;(getf *fleeting-input* (getf input-config :controller-click)))
        (push 'fleeting-lmb-down flags))
-   ;(if (getf *fleeting-input* (intern (concatenate 'string (symbol-name (getf input-config :controller-click)) "-UP") :keyword))
-   ;    (push 'click flags))
-   ;(if (and controller-motion 
-   ;         (getf *stable-input* (getf input-config :controller-click)))
-   ;    (push 'click-and-drag flags))
-   ;(if (and (not (getf *stable-input* (getf input-config :controller-click))) 
-   ;         (not controller-motion))
-   ;    (push 'mouse-hover flags))
-   ;(if (and (getf *stable-input* (getf input-config :controller-click))
-   ;         (not controller-motion))
-   ;    (push 'hold-mouse flags))
    (if (getf *stable-input* :keys-down)
        (push 'key-down flags))
    (if (getf *fleeting-input* :keys-down)
        (push 'fleeting-key-down flags))
-   ;(if (getf *fleeting-input* :controller-a)
-   ;    (push 'fleeting-controller-a-down flags))
-   ;(if (getf *fleeting-input* :controller-b)
-   ;    (push 'fleeting-controller-b-down flags))
-   ;(if (getf *fleeting-input* :controller-x)
-   ;    (push 'fleeting-controller-x-down flags))
-   ;(if (getf *fleeting-input* :controller-y)
-   ;    (push 'fleeting-controller-y-down flags))
-   ;(if (getf *stable-input* :controller-a)
-   ;    (push 'controller-a-down flags))
-   ;(if (getf *stable-input* :controller-b)
-   ;    (push 'controller-b-down flags))
-   ;(if (getf *stable-input* :controller-x)
-   ;    (push 'controller-x-down flags))
-   ;(if (getf *stable-input* :controller-y)
-   ;    (push 'controller-y-down flags))
+   (dolist (key (getf *fleeting-input* :keys-down))
+     (push (intern (string-upcase key))) flags)
    (push 'always flags)
    (if (member 'hover-mouse flags)
        (incf *hover-mouse-time* *delta-t*)

@@ -47,7 +47,8 @@
                                (getf prev-color :g)
                                (getf prev-color :b)
                                (getf prev-color :a))
-   (sdl2:set-render-target (getf surface :sdl-renderer) nil)))
+   (sdl2:set-render-target (getf surface :sdl-renderer) nil)
+   surface))
                                
 (defun create-surface (window x y w h)
   (let ((sdl-texture (sdl2:create-texture (getf window :sdl-renderer) :argb8888 :target w h)))
