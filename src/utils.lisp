@@ -1,3 +1,13 @@
+#| This file is part of Spill.
+
+Spill is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+    
+Spill is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with Spill. If not, see <https://www.gnu.org/licenses/>. 
+
+|# 
+
 (in-package :spill)
 
 (defun getm-iter (item &rest members)
@@ -46,7 +56,8 @@
 (defun middle (number-1 number-2)
   (- (round (/ (max number-1 number-2) 2)) (round (/ (min number-1 number-2) 2))))
 
-(defun split-text (text &key (dividing-character #\newline))
+(defun split-text (text &key (dividing-character #
+ewline))
   (let ((segments nil)
 	(segment-start 0)
 	(segment-end 0))

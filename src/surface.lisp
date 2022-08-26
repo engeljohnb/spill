@@ -1,3 +1,13 @@
+#| This file is part of Spill.
+
+Spill is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+    
+Spill is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with Spill. If not, see <https://www.gnu.org/licenses/>. 
+
+|# 
+
 (in-package :spill)
 
 (defun create-rect (x y w h)
@@ -14,13 +24,28 @@
         (left-2 (getf rect-2 :x))
         (right-1 (+ (getf rect-1 :x) (getf rect-1 :w)))
         (right-2 (+ (getf rect-2 :x) (getf rect-2 :w)))
+	(top-1 (getf rect-1 :y))
         (top-2 (getf rect-2 :y))
         (bottom-1 (+ (getf rect-1 :y) (getf rect-1 :h)))
         (bottom-2 (+ (getf rect-2 :y) (getf rect-2 :h))))
     (and (< left-1 right-2)
          (> right-1 left-2)
-         (< top-2 bottom-2)
+         (< top-1 bottom-2)
          (> bottom-1 top-2))))
+#|
+(defun check-rect-collisions (me him)
+  (let ((left-me (getf rect-me :x))
+        (left-him (getf rect-him :x))
+        (right-me (+ (getf rect-me :x) (getf rect-me :w)))
+        (right-him (+ (getf rect-him :x) (getf rect-him :w)))
+        (top-him (getf rect-him :y))
+        (bottom-me (+ (getf rect-me :y) (getf rect-me :h)))
+        (bottom-him (+ (getf rect-him :y) (getf rect-him :h))))
+    (and (< left-me right-him)
+         (> right-me left-him)
+         (< top-him bottom-him)
+         (> bottom-me top-him)))
+|#
 
 (defun point-collide-p (rect x y)
   (let ((left (getf rect :x))
@@ -105,130 +130,4 @@
 	 (if (member :surface source)
 	     (blit-to-surface (getf source :surface) (getf dest :surface))
 	     (blit-to-surface source :surface (getf dest :surface))))
-        (t (progn (format t "blit error: invalid surface: ~%")
-		  (print dest)
-		  (fresh-line)
-		  (invoke-debugger)))))
-
-(defun free-surface (surface)
-  (sdl2:destroy-texture (getf surface :sdl-texture)))
- 
-
-(defun draw-rect (dest color rect &optional (filled-p t))
-  (let ((split-color (break-color color))
-        (prev-color (break-color (sdl2:get-render-draw-color (getf dest :sdl-renderer))))
-        (fun 'sdl2:render-draw-rect))
-   (if filled-p
-       (setf fun 'sdl2:render-fill-rect))
-   (if (member :sdl-texture dest)
-       (progn
-         (sdl2:set-render-target (getf dest :sdl-renderer) (getf dest :sdl-texture))
-         (sdl2:set-render-draw-color (getf dest :sdl-renderer)
-                                    (getf split-color :r)
-                                    (getf split-color :g)
-                                    (getf split-color :b)
-                                    (getf split-color :a))
-         (eval  `(,fun ,(getf dest :sdl-renderer) ,(spillp-convert-rect rect)))
-         (sdl2:set-render-draw-color (getf dest :sdl-renderer)
-                                    (getf prev-color :r)
-                                    (getf prev-color :g) 
-                                    (getf prev-color :b)
-                                    (getf prev-color :a))
-         (sdl2:set-render-target (getf dest :sdl-renderer) nil)))
-   (if (member :sdl-window dest)
-       (progn
-         (sdl2:set-render-draw-color (getf dest :sdl-renderer)
-                                     (getf split-color :r)
-                                     (getf split-color :g)
-                                     (getf split-color :b)
-                                     (getf split-color :a))
-         (eval `(,fun ,(getf dest :sdl-renderer) ,(spillp-convert-rect rect)))
-         (sdl2:set-render-draw-color (getf dest :sdl-renderer)
-                                     (getf prev-color :r)
-                                     (getf prev-color :g)
-                                     (getf prev-color :b)
-                                     (getf prev-color :a))))))
-
-(defun draw-simple-triangle (dest apex-x apex-y height color &optional (direction 'right))
-  (let ((split-color (break-color color))
-        (prev-color (break-color (sdl2:get-render-draw-color (getf dest :sdl-renderer))))
-        (current-w 0)
-        (fun #'+))
-    (if (member :sdl-texture dest)
-        (sdl2:set-render-target (getf dest :sdl-renderer) (getf dest :sdl-texture))
-        (sdl2:set-render-target (getf dest :sdl-renderer) nil))
-    (if (eq direction 'left)
-        (setf fun #'-))
-    (sdl2:set-render-draw-color (getf dest :sdl-renderer)
-                                (getf split-color :r)
-                                (getf split-color :g)
-                                (getf split-color :b)
-                                (getf split-color :a))
-    (loop for i from apex-y to (+ apex-y height) collect
-          (progn
-           (sdl2:render-draw-line (getf dest :sdl-renderer) apex-x i (funcall fun apex-x current-w) i)
-           (incf current-w)))
-    (sdl2:set-render-target (getf dest :sdl-renderer) nil)
-    (sdl2:set-render-draw-color (getf dest :sdl-renderer)
-                                 (getf prev-color :r)
-                                 (getf prev-color :g)
-                                 (getf prev-color :b)
-                                 (getf prev-color :a))))
-
-(defun default-up-surface (window width height name font-path config-colors border-width &optional (icon nil))
-  (let ((surface (create-surface window 0 0 width height))
-        (font (open-font 
-              font-path
-              (round (* height 0.5)))))
-    (fill-surface surface (getf config-colors :base-color))
-    (draw-rect surface 
-                     (getf config-colors :top-border)
-                     (create-rect 0 0 width border-width))
-    (draw-rect surface 
-                     (getf config-colors :top-border)
-                     (create-rect 0 0 border-width height))
-    (draw-rect surface 
-                     (getf config-colors :bottom-border)
-                     (create-rect (- width border-width) border-width border-width height))
-    (draw-rect surface 
-                     (getf config-colors :bottom-border)
-                     (create-rect border-width (- height border-width) width border-width))
-    (draw-simple-triangle surface border-width (- height border-width) border-width (getf config-colors :bottom-border) 'left)
-    (draw-simple-triangle surface width 0 border-width (getf config-colors :bottom-border) 'left)
-    (if icon
-        (blit surface icon)
-        (if name (draw-text surface font name :color (getf config-colors :text-color))))
-    (close-font font)
-    surface))
-
-(defun default-down-surface (window width height name font-path config-colors border-width &optional (icon nil))
-  (let ((surface (create-surface window 0 0 width height))
-        (font (open-font 
-              font-path
-              (round (* height 0.5)))))
-    (fill-surface surface (getf config-colors :base-color))
-    (draw-rect surface (getf config-colors :top-border)
-                     (create-rect 0 0 width border-width))
-    (draw-rect surface (getf config-colors :top-border)
-                     (create-rect 0 0 border-width height))
-    (draw-rect surface (getf config-colors :bottom-border)
-                     (create-rect (- width border-width) border-width border-width height))
-    (draw-rect surface (getf config-colors :bottom-border)
-                     (create-rect border-width (- height border-width) width border-width))
-    (draw-simple-triangle surface border-width (- height border-width) border-width (getf config-colors :bottom-border) 'left)
-    (draw-simple-triangle surface width 0 border-width (getf config-colors :bottom-border) 'left)
-    (if icon
-        (blit surface icon)
-        (if name (draw-text surface font name :color (getf config-colors :text-color))))
-    (close-font font)
-    surface))
-
-(defun create-image (window x y w h)
-  (let ((image (list :surface (create-surface window x y w h)
-		     :window window
-		     :default-rect (create-rect x y w h)
-		     :callbacks nil
-		     :callback-data nil
-		     :selected nil
-		     :active nil)))
-    image))
+        (t (progn (format t "blit error: invalid surface: ~

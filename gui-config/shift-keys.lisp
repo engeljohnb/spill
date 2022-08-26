@@ -1,6 +1,22 @@
+#| This file is part of Spill.
 
-(defparameter *shift-key-row0* (list "`" "!" "@" "#" "$" "%" "^" "&" "*" "(" "" "_" "+" "backspace")
-(defparameter *shift-key-row1* (list "Q" "W" "E" "R" "T" "Y" "U" "I" "O" "P" "{" "}" "|")
-(defparameter *shift-key-row2* (list "A" "S" "D" "F" "G" "H" "J" "K" "L" ":" "'" "return")
-(defparameter *shift-key-row3* (list "Z" "X" "C" "V" "B" "N" "M" "," "." "?" "shift")
-(defparameter *shift-key-row4* (list "space")
+Spill is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+    
+Spill is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with Spill. If not, see <https://www.gnu.org/licenses/>. 
+
+|# 
+
+#| This file is part of Spill.
+
+Spill is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+    
+Spill is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with Spill. If not, see <https://www.gnu.org/licenses/>. 
+
+|# 
+
+
+(defparameter *shift-key-row0* (list "`" "!" "@" "#" "$" "
