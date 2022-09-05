@@ -149,4 +149,3 @@ You should have received a copy of the GNU General Public License along with Spi
 (defun free-window (window)
   (sdl2:destroy-window (getf window :sdl-window))
   (sdl2:destroy-renderer (getf window :sdl-renderer)))
-    (setf (gethash '|5| shift-hash) "

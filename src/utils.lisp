@@ -56,8 +56,7 @@ You should have received a copy of the GNU General Public License along with Spi
 (defun middle (number-1 number-2)
   (- (round (/ (max number-1 number-2) 2)) (round (/ (min number-1 number-2) 2))))
 
-(defun split-text (text &key (dividing-character #
-ewline))
+(defun split-text (text &key (dividing-character #\newline))
   (let ((segments nil)
 	(segment-start 0)
 	(segment-end 0))
