@@ -8,10 +8,6 @@ You should have received a copy of the GNU General Public License along with Spi
 
 |# 
 
-(in-package :spill)
-(load "/home/john/quicklisp/local-projects/spill/gui-config/button-config.lisp")
-(load "/home/john/quicklisp/local-projects/spill/gui-config/input-config.lisp")
-(load "/home/john/quicklisp/local-projects/spill/gui-config/typing-bar-config.lisp")
-(load "/home/john/quicklisp/local-projects/spill/gui-config/label-config.lisp")
-(load "/home/john/quicklisp/local-projects/spill/gui-config/tab-config.lisp")
-(load "/home/john/quicklisp/local-projects/spill/gui-config/info-box-config.lisp")
+(defparameter *default-input-config*
+  (list :source 'key-and-mouse
+        :controller-click :controller-a))

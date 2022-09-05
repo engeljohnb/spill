@@ -32,20 +32,6 @@ You should have received a copy of the GNU General Public License along with Spi
          (> right-1 left-2)
          (< top-1 bottom-2)
          (> bottom-1 top-2))))
-#|
-(defun check-rect-collisions (me him)
-  (let ((left-me (getf rect-me :x))
-        (left-him (getf rect-him :x))
-        (right-me (+ (getf rect-me :x) (getf rect-me :w)))
-        (right-him (+ (getf rect-him :x) (getf rect-him :w)))
-        (top-him (getf rect-him :y))
-        (bottom-me (+ (getf rect-me :y) (getf rect-me :h)))
-        (bottom-him (+ (getf rect-him :y) (getf rect-him :h))))
-    (and (< left-me right-him)
-         (> right-me left-him)
-         (< top-him bottom-him)
-         (> bottom-me top-him)))
-|#
 
 (defun point-collide-p (rect x y)
   (let ((left (getf rect :x))
@@ -131,7 +117,6 @@ You should have received a copy of the GNU General Public License along with Spi
 	 (if (member :surface source)
 	     (blit-to-surface (getf source :surface) (getf dest :surface))
 	     (blit-to-surface source :surface (getf dest :surface))))
-<<<<<<< HEAD
         (t (progn (format t "blit error: invalid surface: ~%")
 		  (print dest)
 		  (fresh-line)
@@ -262,6 +247,3 @@ You should have received a copy of the GNU General Public License along with Spi
 		     :selected nil
 		     :active nil)))
     image))
-=======
-        (t (progn (format t "blit error: invalid surface: ~
->>>>>>> 35c4e9c4fc15c5457a743e750f60bfd3913624ce

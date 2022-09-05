@@ -22,11 +22,8 @@ You should have received a copy of the GNU General Public License along with Spi
     #:create-gui
     #:create-rect
     #:create-surface
-<<<<<<< HEAD
     #:free-surface
-=======
     #:rect-collide-p
->>>>>>> 35c4e9c4fc15c5457a743e750f60bfd3913624ce
     #:create-button
     #:free-button
     #:create-image
