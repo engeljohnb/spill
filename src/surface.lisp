@@ -56,6 +56,7 @@
   (list :sdl-texture sdl-texture 
         :sdl-renderer (getf window :sdl-renderer)
         :rect (create-rect x y w h)
+	:freed nil
         :window window)))
 
 (defun blit-to-surface (source dest source-rect dest-rect)
@@ -111,7 +112,10 @@
 		  (invoke-debugger)))))
 
 (defun free-surface (surface)
-  (sdl2:destroy-texture (getf surface :sdl-texture)))
+  (if surface
+      (if (not (getf surface :freed))
+          (progn (sdl2:destroy-texture (getf surface :sdl-texture))
+	         (setf (getf surface :freed) t)))))
  
 
 (defun draw-rect (dest color rect &optional (filled-p t))

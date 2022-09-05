@@ -3,14 +3,18 @@
   (:export
     #:init
     #:quit
-    #:--print
+    #:start-time
+    #:end-time
+    #:*time-keeping-strings*
     #:set-window-bg
     #:create-window
     #:create-typing-bar
     #:create-gui
     #:create-rect
     #:create-surface
+    #:free-surface
     #:create-button
+    #:free-button
     #:create-image
     #:fill-surface
     #:add-callback

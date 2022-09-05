@@ -39,7 +39,14 @@
           (push (cons block-name (sdl2:get-ticks)) *started-blocks*)))
 
 (defun end-time (block-name)
-  (format t "~A ~A ~%" block-name (if (assoc block-name *started-blocks*) (- (sdl2:get-ticks) (cdr (assoc block-name *started-blocks*))) 0))
+  (push (format nil "~A~A~A~A~%" 
+	  block-name 
+	  #\tab
+	  #\tab
+	  (if (assoc block-name *started-blocks*) 
+	      (- (sdl2:get-ticks) (cdr (assoc block-name *started-blocks*))) 
+	      0))
+	*time-keeping-strings*)
   (setf *started-blocks* (remove (assoc block-name *started-blocks*) *started-blocks*)))
 
 #|(defun end-time (block-name)

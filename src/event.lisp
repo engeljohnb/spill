@@ -89,7 +89,7 @@
    (if (getf *fleeting-input* :keys-down)
        (push 'fleeting-key-down flags))
    (dolist (key (getf *fleeting-input* :keys-down))
-     (push (intern (string-upcase key))) flags)
+     (push (intern (string-upcase key)) flags))
    (push 'always flags)
    (if (member 'hover-mouse flags)
        (incf *hover-mouse-time* *delta-t*)
