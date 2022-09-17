@@ -28,6 +28,9 @@ You should have received a copy of the GNU General Public License along with Spi
     #:free-button
     #:create-image
     #:fill-surface
+    #:open-font
+    #:close-font
+    #:draw-text
     #:add-callback
     #:blit
     #:get-keys
@@ -42,6 +45,8 @@ You should have received a copy of the GNU General Public License along with Spi
     #:add-page
     #:set-current-page
     #:open-window
+    #:clear-window
+    #:flip-window
     #:add-widget-callback
     #:get-event
     #:reset-events

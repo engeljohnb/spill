@@ -79,7 +79,8 @@
      (setf (getm text-surface :rect :x) tx)
      (setf (getm text-surface :rect :y) ty)
      (blit text-surface surface)
-         (free-surface text-surface))))
+         (free-surface text-surface))
+   surface))
 
 (defun last-char (_string)
   (char _string (- (length _string) 1)))
