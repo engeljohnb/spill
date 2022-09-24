@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License along with Spi
     #:end-time
     #:*time-keeping-strings*
     #:set-window-bg
+    #:get-screen-size
     #:create-window
     #:create-typing-bar
     #:create-gui

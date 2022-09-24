@@ -61,7 +61,17 @@ You should have received a copy of the GNU General Public License along with Spi
   (sdl2-ttf:init)
   (init-shift-checker *shift-hash*))
 
-
+(defun get-screen-size ()
+  (let* ((window (sdl2:create-window :title ""
+				     :x 0
+				     :y 0
+				     :w 0
+				     :h 0
+				     :flags '(:fullscreen)))
+	 (size (sdl2:get-window-size window)))
+    (sdl2:destroy-window window)
+    size))
+	
 (defun create-window (title x y w h &key (fullscreen nil))
   (let ((flags nil))
     (if (eql fullscreen t)
