@@ -67,10 +67,11 @@ You should have received a copy of the GNU General Public License along with Spi
 				     :y 0
 				     :w 0
 				     :h 0
-				     :flags '(:fullscreen)))
-	 (size (sdl2:get-window-size window)))
+				     :flags '(:fullscreen-desktop)))
+	 (w (first (multiple-value-list (sdl2:get-window-size window))))
+	 (h (second (multiple-value-list (sdl2:get-window-size window)))))
     (sdl2:destroy-window window)
-    size))
+    (list :w w :h h)))
 	
 (defun create-window (title x y w h &key (fullscreen nil))
   (let ((flags nil))

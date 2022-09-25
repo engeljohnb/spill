@@ -57,6 +57,7 @@ You should have received a copy of the GNU General Public License along with Spi
 		     (getf widget :rect))
 		    (t (progn (print "get-relative-mouse-pose error: invalid widget")
 			      (create-rect 0 0 0 0))))))
+    (if (not rect) (setf rect (create-rect 0 0 0 0)))
     (if (and (eq (getf widget :type) 'tab-frame)
              (getf widget :selected)) 
         (progn (print rect)
